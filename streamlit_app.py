@@ -8,7 +8,10 @@ import subprocess
 from PIL import Image
 import speech_recognition as sr
 import pyttsx3
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    import genai
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -24,9 +27,9 @@ if 'mic_enabled' not in st.session_state:
     st.session_state.mic_enabled = True
 
 # Paths
-IMAGE_PATH = "/home/er/Documents/reasoning320/googleResoning/rosbridge/current_frame.png"
-AUDIO_FILE = "/home/er/Documents/reasoning320/googleResoning/audiofile/ip.wav"
-SCENE_DB = "/home/er/Documents/reasoning320/googleResoning/memory/scene_descriptions.jsonl"
+IMAGE_PATH = "/home/er/Documents/reasoning320/googleReasoning/rosbridge/current_frame.png"
+AUDIO_FILE = "/home/er/Documents/reasoning320/googleReasoning/audiofile/ip.wav"
+SCENE_DB = "/home/er/Documents/reasoning320/googleReasoning/memory/scene_descriptions.jsonl"
 
 class StreamlitASR:
     def __init__(self):
@@ -96,7 +99,7 @@ def capture_image():
             "/bin/bash", "-c",
             "source /opt/ros/noetic/setup.bash && "
             "source ~/catkin_ws/devel/setup.bash && "
-            "python3 /home/er/Documents/reasoning320/googleResoning/rosbridge/image_saver.py"
+            "python3 /home/er/Documents/reasoning320/googleReasoning/rosbridge/image_saver.py"
         ], timeout=10)
         return True
     except Exception as e:

@@ -23,7 +23,16 @@ class Utility:
 
             Observation: {observation}
 
-            Please describe everything you see in one smooth paragraph: mention object types, their relative positions (e.g. top-left, bottom-right), and note any defects such as bent pins or cracks. 
+            Please look for the following objects in the scene:
+            - drawstring pouch
+            - plastic cube
+            - titanium blade
+            - squishy toy car
+
+            For each object you spot, describe its material, softness, surface texture, and any other relevant property. Then, recommend a suitable grip strength classification (low, moderate, high, very high) and a numeric value (0–100) for the robotic gripper, based on your analysis. Justify your recommendation for each object.
+
+            If none of the four objects are present, state that none were found.
+
             Do NOT use bullet points, numbered steps, headings, or summary labels—just one natural, fluid paragraph.
         """).strip()
 

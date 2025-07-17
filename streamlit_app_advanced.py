@@ -8,18 +8,34 @@ import subprocess
 from PIL import Image
 import speech_recognition as sr
 import pyttsx3
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    import genai
 from dotenv import load_dotenv
 
 # Import your existing components
 import sys
-sys.path.append('.')
-from src.audio_transcription.asr import ASR
-from src.audio_transcription.fast_tts import FastTTS
-from src.routing.router import Router
-from src.language_models.vision_sceneunderstanding import VLM
-from src.language_models.llm_user_action_response import UAResponse
-from src.language_models.util import Utility
+import os
+
+# Add the correct absolute path to your src folder
+SRC_PATH = "/home/er/Documents/reasoning320/googleReasoning/src"
+sys.path.append(SRC_PATH)
+
+try:
+    from audio_transcription.asr import ASR
+    from audio_transcription.fast_tts import FastTTS
+    from routing.router import Router
+    from language_models.vision_sceneunderstanding import VLM
+    from language_models.llm_user_action_response import UAResponse
+    from language_models.util import Utility
+    MODULES_AVAILABLE = True
+    print(f"Successfully imported modules from: {SRC_PATH}")
+except ImportError as e:
+    print(f"Warning: Could not import some modules: {e}")
+    print(f"Tried to import from: {SRC_PATH}")
+    print("Running in basic mode without full system integration")
+    MODULES_AVAILABLE = False
 
 # Load environment variables
 load_dotenv()
@@ -36,13 +52,18 @@ if 'system_initialized' not in st.session_state:
     st.session_state.system_initialized = False
 
 # Paths
-IMAGE_PATH = "/home/er/Documents/reasoning320/googleResoning/rosbridge/current_frame.png"
-AUDIO_FILE = "/home/er/Documents/reasoning320/googleResoning/audiofile/ip.wav"
-SCENE_DB = "/home/er/Documents/reasoning320/googleResoning/memory/scene_descriptions.jsonl"
+IMAGE_PATH = "/home/er/Documents/reasoning320/googleReasoning/rosbridge/current_frame.png"
+AUDIO_FILE = "/home/er/Documents/reasoning320/googleReasoning/audiofile/ip.wav"
+SCENE_DB = "/home/er/Documents/reasoning320/googleReasoning/memory/scene_descriptions.jsonl"
 
 # Initialize system components
 def initialize_system():
     if not st.session_state.system_initialized:
+        if not MODULES_AVAILABLE:
+            st.warning("Running in basic mode - some system components are not available")
+            st.session_state.system_initialized = True
+            return True
+            
         try:
             st.session_state.asr_ob = ASR()
             st.session_state.tts_ob = FastTTS()
@@ -82,7 +103,7 @@ def capture_image():
             "/bin/bash", "-c",
             "source /opt/ros/noetic/setup.bash && "
             "source ~/catkin_ws/devel/setup.bash && "
-            "python3 /home/er/Documents/reasoning320/googleResoning/rosbridge/image_saver.py"
+            "python3 /home/er/Documents/reasoning320/googleReasoning/rosbridge/image_saver.py"
         ], timeout=10)
         return True
     except Exception as e:
@@ -93,6 +114,10 @@ def process_user_input(user_input):
     """Process user input using the existing system components"""
     if not initialize_system():
         return "System initialization failed. Please check the console for errors."
+    
+    # If modules are not available, use basic processing
+    if not MODULES_AVAILABLE:
+        return f"I heard you say: '{user_input}'. This is basic mode - full system integration is not available."
     
     try:
         # Step 1: Routing
@@ -215,10 +240,16 @@ def main():
         st.write(f"Current Image: {'✅ Available' if image_exists else '❌ Not found'}")
         
         # System components status
-        st.write(f"ASR: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
-        st.write(f"TTS: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
-        st.write(f"Router: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
-        st.write(f"VLM: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
+        if MODULES_AVAILABLE:
+            st.write(f"ASR: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
+            st.write(f"TTS: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
+            st.write(f"Router: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
+            st.write(f"VLM: {'✅ Ready' if st.session_state.system_initialized else '❌ Not ready'}")
+        else:
+            st.write("ASR: ⚠️ Basic mode")
+            st.write("TTS: ⚠️ Basic mode")
+            st.write("Router: ⚠️ Basic mode")
+            st.write("VLM: ⚠️ Basic mode")
     
     with col2:
         st.subheader("💬 Chat Interface")

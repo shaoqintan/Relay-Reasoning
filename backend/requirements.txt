@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-dotenv
+speechrecognition
+pyttsx3
+pillow
+langchain
+google-generativeai
+langchain-google-genai
+opencv-python
+rospy
+cv_bridge
+pydub 
